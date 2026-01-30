@@ -1,0 +1,43 @@
+(env
+ (dev
+  (flags
+   (:standard -warn-error -A))))
+
+(executable
+ (public_name caisse)
+ (name caisse_bin)
+ (modules caisse_bin)
+ (libraries caisse gamelle.sdl))
+
+(rule
+ (target caisse_bin.ml)
+ (action
+  (with-stdout-to
+   caisse_bin.ml
+   (run echo "include Caisse"))))
+
+(executable
+ (name caisse_js)
+ (modules caisse_js)
+ (modes js)
+ (flags )
+ (libraries caisse gamelle.jsoo))
+
+(rule
+ (target caisse_js.ml)
+ (action
+  (with-stdout-to
+   caisse_js.ml
+   (run echo "include Caisse"))))
+
+(rule
+ (target caisse.html)
+ (deps caisse.template.html caisse_js.bc.js)
+ (action
+  (with-stdout-to
+   caisse.html
+   (run
+    %{bin:gamelle}
+    html
+    --template=caisse.template.html
+    --script=caisse_js.bc.js))))
