@@ -1,6 +1,6 @@
 (library
  (name caisse)
- (libraries gamelle grid)
+ (libraries gamelle grid maze)
  (preprocess
   (pps gamelle.ppx_ui)))
 

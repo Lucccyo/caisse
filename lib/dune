@@ -1,0 +1,4 @@
+(library
+ (name maze)
+ (public_name caisse.maze)
+ (libraries grid))
