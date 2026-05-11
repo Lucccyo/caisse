@@ -1,6 +1,13 @@
 open Gamelle
 
-type state = { t: int; maze: Maze.cell Grid.t; caisse: Grid.position; victory: Grid.position }
+type state = {
+  t: int;
+  maze: Maze.cell Grid.t;
+  caisse: Grid.position;
+  victory: Grid.position;
+  cooldown: float;
+  last_time: float;
+}
 
 let csize = 40.
 
@@ -20,7 +27,7 @@ let next_state () =
     else victory ()
   in
   let victory = victory () in
-  { t = 0; maze; caisse; victory }
+  { t = 0; maze; caisse; victory; cooldown = 0.15; last_time = 0. }
 
 let draw_maze maze ~io =
   Grid.iter (fun (x, y) cell ->
@@ -65,7 +72,7 @@ let move state dir =
     match Grid.get state.maze target with
     | NotWall ->
       if target = state.victory then next_state ()
-      else { t = state.t + 1; maze = state.maze; caisse = target; victory = state.victory }
+      else {state with t = state.t + 1; caisse = target }
     | Wall -> {state with t = state.t + 1}
   ) else
   state
@@ -74,7 +81,13 @@ let () =
   Random.init 18;
   Gamelle.run (next_state ()) @@ fun ~io state ->
     draw_state state io;
-    if state.t mod 7 <> 0 then { state with t = state.t + 1} else (
+    let now = Unix.gettimeofday () in
+    let dt = now -. state.last_time in
+    let cooldown = max 0. (state.cooldown -.dt) in
+    if cooldown > 0. then
+      {state with cooldown; last_time = now}
+    else (
+
       if      Input.is_pressed ~io `arrow_right then move state Grid.S
       else if Input.is_pressed ~io `arrow_left  then move state Grid.N
       else if Input.is_pressed ~io `arrow_up    then move state Grid.W
