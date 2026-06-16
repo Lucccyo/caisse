@@ -116,10 +116,13 @@ let () =
       else if Input.is_pressed ~io `arrow_up    then Some(Grid.W)
       else if Input.is_pressed ~io `arrow_down  then Some(Grid.E)
       else None in
+    let new_grid = Input.is_pressed ~io `space in
     if state.last_frame +.framespeed <= clock ~io then
-      let state = match dir with
-        | Some d -> move state d
-        | None -> state in
-      {state with last_frame = state.last_frame +. framespeed}
+      if new_grid then next_grid () else (
+        let state = match dir with
+          | Some d -> move state d
+          | None -> state in
+        {state with last_frame = state.last_frame +. framespeed}
+      )
     else
       state
